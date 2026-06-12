@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { getUserIntegrations } from '@/lib/auth-service'
 import { buildSpotifyAuthUrl, getSpotifyRecentlyPlayed } from '@/lib/spotify-api'
+import { buildGitHubAuthUrl, getGitHubCommits } from '@/lib/github-api'
 
 export async function GET() {
   try {
@@ -13,7 +14,6 @@ export async function GET() {
 
     const integrations = await getUserIntegrations(session.user.id)
     
-    // Add real-time track count if spotify is connected
     const enrichedIntegrations = await Promise.all(integrations.map(async (integration: any) => {
       if (integration.provider === 'spotify') {
         try {
@@ -22,7 +22,18 @@ export async function GET() {
           const tracksToday = recent.filter((item: any) => new Date(item.played_at).getTime() > today).length
           return { ...integration, tracks_today: tracksToday }
         } catch (e) {
-          console.error('Failed to fetch spotify metrics for integration list:', e)
+          console.error('Failed to fetch spotify metrics:', e)
+          return integration
+        }
+      }
+      if (integration.provider === 'github') {
+        try {
+          const commits = await getGitHubCommits(session.user.id, 50)
+          const today = new Date().setHours(0, 0, 0, 0)
+          const commitsToday = commits.filter((c: any) => new Date(c.time).getTime() > today).length
+          return { ...integration, commits_today: commitsToday }
+        } catch (e) {
+          console.error('Failed to fetch github metrics:', e)
           return integration
         }
       }
@@ -37,6 +48,7 @@ export async function GET() {
         updated_at: integration.updated_at,
         expires_at: integration.expires_at,
         tracks_today: integration.tracks_today,
+        commits_today: integration.commits_today,
       })),
     })
   } catch (error) {
@@ -61,6 +73,11 @@ export async function POST(request: NextRequest) {
 
     if (provider === 'spotify') {
       const authUrl = buildSpotifyAuthUrl()
+      return NextResponse.json({ auth_url: authUrl })
+    }
+
+    if (provider === 'github') {
+      const authUrl = buildGitHubAuthUrl()
       return NextResponse.json({ auth_url: authUrl })
     }
 

@@ -56,15 +56,16 @@ export async function updateUserProfile(userId: string, name: string, avatar_url
   return result[0] as User
 }
 
-export async function saveSpotifyIntegration(
+export async function saveIntegration(
   userId: string,
+  provider: string,
   accessToken: string,
   refreshToken: string,
-  expiresAt: Date
+  expiresAt: Date | null
 ): Promise<void> {
   await db`
     INSERT INTO integrations (user_id, provider, access_token, refresh_token, expires_at)
-    VALUES (${userId}, 'spotify', ${accessToken}, ${refreshToken}, ${expiresAt})
+    VALUES (${userId}, ${provider}, ${accessToken}, ${refreshToken}, ${expiresAt})
     ON CONFLICT (user_id, provider)
     DO UPDATE SET
       access_token = EXCLUDED.access_token,
@@ -74,14 +75,27 @@ export async function saveSpotifyIntegration(
   `
 }
 
-export async function getSpotifyIntegration(userId: string) {
+export async function getIntegrationByProvider(userId: string, provider: string) {
   const result = await db`
     SELECT id, access_token, refresh_token, expires_at
     FROM integrations
-    WHERE user_id = ${userId} AND provider = 'spotify'
+    WHERE user_id = ${userId} AND provider = ${provider}
   `
 
   return result[0] || null
+}
+
+export async function saveSpotifyIntegration(
+  userId: string,
+  accessToken: string,
+  refreshToken: string,
+  expiresAt: Date
+): Promise<void> {
+  return saveIntegration(userId, 'spotify', accessToken, refreshToken, expiresAt)
+}
+
+export async function getSpotifyIntegration(userId: string) {
+  return getIntegrationByProvider(userId, 'spotify')
 }
 
 export async function getUserIntegrations(userId: string) {

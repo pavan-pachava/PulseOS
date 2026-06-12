@@ -19,31 +19,37 @@ interface SpotifyTrack {
   played_at: string
 }
 
+interface GitHubCommit {
+  message: string
+  repo: string
+  time: string
+  lines: number
+}
+
 export default function AnalyticsPage() {
   const [recentTracks, setRecentTracks] = useState<SpotifyTrack[]>([])
+  const [recentCommits, setRecentCommits] = useState<GitHubCommit[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isUsingMock, setIsUsingMock] = useState(false)
+  const [isUsingMockSpotify, setIsUsingMockSpotify] = useState(false)
+  const [isUsingMockGitHub, setIsUsingMockGitHub] = useState(false)
 
   useEffect(() => {
     async function fetchAnalytics() {
+      setLoading(true)
+      
+      // Fetch Spotify
       try {
         const res = await fetch('/api/data/spotify/history?limit=20')
-        if (!res.ok) {
-          throw new Error('Spotify not connected')
-        }
         const data = await res.json()
         if (data.items && data.items.length > 0) {
           setRecentTracks(data.items)
-          setIsUsingMock(false)
+          setIsUsingMockSpotify(false)
         } else {
-          throw new Error('No tracks found')
+          throw new Error('No tracks')
         }
       } catch (err) {
-        console.error('Error fetching analytics:', err)
-        setIsUsingMock(true)
-        // Use mock data
-        const mockItems = mockAnalyticsData.listening_timeline.recent.map(item => ({
+        setIsUsingMockSpotify(true)
+        setRecentTracks(mockAnalyticsData.listening_timeline.recent.map(item => ({
           track: {
             id: '',
             name: item.track,
@@ -53,11 +59,25 @@ export default function AnalyticsPage() {
             duration_ms: item.duration * 60000,
           },
           played_at: item.time,
-        }))
-        setRecentTracks(mockItems)
-      } finally {
-        setLoading(false)
+        })))
       }
+
+      // Fetch GitHub
+      try {
+        const res = await fetch('/api/data/github/history?limit=10')
+        const data = await res.json()
+        if (data.items && data.items.length > 0) {
+          setRecentCommits(data.items)
+          setIsUsingMockGitHub(false)
+        } else {
+          throw new Error('No commits')
+        }
+      } catch (err) {
+        setIsUsingMockGitHub(true)
+        setRecentCommits(mockAnalyticsData.coding_timeline.recent)
+      }
+
+      setLoading(false)
     }
 
     fetchAnalytics()
@@ -85,9 +105,12 @@ export default function AnalyticsPage() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-4xl font-bold text-white">Deep Analytics</h1>
-          {isUsingMock ? (
-            <Badge variant="warning">Mock Data</Badge>
-          ) : (
+          {(isUsingMockSpotify || isUsingMockGitHub) && (
+            <Badge variant="warning">
+              {isUsingMockSpotify && isUsingMockGitHub ? 'Mock Data' : isUsingMockSpotify ? 'Mock Spotify' : 'Mock GitHub'}
+            </Badge>
+          )}
+          {(!isUsingMockSpotify && !isUsingMockGitHub) && (
             <Badge variant="success">Live Data</Badge>
           )}
         </div>
@@ -100,7 +123,7 @@ export default function AnalyticsPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Listening Timeline</h2>
-          {!isUsingMock && <span className="text-sm text-slate-400">{recentTracks.length} recent tracks</span>}
+          {!isUsingMockSpotify && <span className="text-sm text-slate-400">{recentTracks.length} recent tracks</span>}
         </div>
         <Card>
           <p className="text-sm text-slate-400 mb-4">Full history of what you listened to, when, for how long.</p>
@@ -136,20 +159,30 @@ export default function AnalyticsPage() {
 
       {/* Coding Timeline */}
       <section>
-        <h2 className="text-xl font-bold text-white mb-4">Coding Timeline</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white">Coding Timeline</h2>
+          {!isUsingMockGitHub && <span className="text-sm text-slate-400">{recentCommits.length} recent commits</span>}
+        </div>
         <Card>
           <p className="text-sm text-slate-400 mb-4">Commit frequency over time, language breakdown per month, most productive repos, commit message tone trend</p>
-          <Badge>GitHub API</Badge>
-          <div className="mt-6 space-y-3">
-            {mockAnalyticsData.coding_timeline.recent.map((item: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-                <div>
-                  <p className="font-semibold text-white">{item.message}</p>
-                  <p className="text-sm text-slate-400">{item.repo} • {item.time}</p>
+          <div className="mt-6 space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            {recentCommits.length > 0 ? (
+              recentCommits.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
+                  <div>
+                    <p className="font-semibold text-white leading-tight">{item.message}</p>
+                    <p className="text-xs text-slate-400 mt-1">{item.repo} • {
+                      isNaN(new Date(item.time).getTime()) 
+                        ? item.time 
+                        : new Date(item.time).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    }</p>
+                  </div>
+                  <p className="text-sm font-mono text-green-400">+{item.lines}</p>
                 </div>
-                <p className="text-sm text-slate-400">+{item.lines}</p>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-slate-400 text-sm text-center py-4">Connect GitHub to see your coding history</p>
+            )}
           </div>
         </Card>
       </section>

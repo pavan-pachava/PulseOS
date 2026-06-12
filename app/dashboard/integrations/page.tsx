@@ -16,6 +16,7 @@ interface Integration {
   updated_at: string
   expires_at: string
   tracks_today?: number
+  commits_today?: number
 }
 
 export default function IntegrationsPage() {
@@ -24,6 +25,7 @@ export default function IntegrationsPage() {
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const spotifySuccess = searchParams.get('spotify') === 'connected'
+  const githubSuccess = searchParams.get('github') === 'connected'
 
   useEffect(() => {
     async function fetchIntegrations() {
@@ -41,14 +43,14 @@ export default function IntegrationsPage() {
     }
 
     fetchIntegrations()
-  }, [spotifySuccess])
+  }, [spotifySuccess, githubSuccess])
 
-  const connectSpotify = async () => {
+  const connectIntegration = async (provider: string) => {
     try {
       const res = await fetch('/api/integrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'spotify' }),
+        body: JSON.stringify({ provider }),
       })
       if (!res.ok) throw new Error('Failed to get auth URL')
       const data = await res.json()
@@ -83,9 +85,9 @@ export default function IntegrationsPage() {
       </div>
 
       {error && <ErrorAlert message={error} />}
-      {spotifySuccess && (
+      {(spotifySuccess || githubSuccess) && (
         <div className="bg-green-900/30 border border-green-700 rounded-lg p-4">
-          <p className="text-green-300">✅ Spotify connected successfully!</p>
+          <p className="text-green-300">✅ {spotifySuccess ? 'Spotify' : 'GitHub'} connected successfully!</p>
         </div>
       )}
 
@@ -129,6 +131,21 @@ export default function IntegrationsPage() {
                         <p className="text-xs text-slate-400">Sync</p>
                       </div>
                     </>
+                  ) : integration.id === 'github' && isConnected ? (
+                    <>
+                      <div>
+                        <p className="text-xl font-bold text-white">Live</p>
+                        <p className="text-xs text-slate-400">Status</p>
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold text-white">{connectedInfo.commits_today || '-'}</p>
+                        <p className="text-xs text-slate-400">Commits Today</p>
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold text-white">Active</p>
+                        <p className="text-xs text-slate-400">Sync</p>
+                      </div>
+                    </>
                   ) : (
                     Object.entries(integration.metrics).map(([key, value]) => (
                       <div key={key}>
@@ -148,11 +165,11 @@ export default function IntegrationsPage() {
                   <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-slate-600'}`}></span>
                   {isConnected ? 'Connected' : 'Not Connected'}
                 </span>
-                {integration.id === 'spotify' && !isConnected && (
+                {(integration.id === 'spotify' || integration.id === 'github') && !isConnected && (
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={connectSpotify}
+                    onClick={() => connectIntegration(integration.id)}
                   >
                     Connect
                   </Button>
