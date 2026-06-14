@@ -8,6 +8,33 @@ export interface GitHubTokenResponse {
   scope: string
 }
 
+interface GitHubSearchCommitItem {
+  sha: string
+  commit: {
+    message: string
+    author: {
+      date: string
+    }
+  }
+  repository: {
+    full_name: string
+  }
+}
+
+interface GitHubEvent {
+  type: string
+  repo: {
+    name: string
+  }
+  created_at: string
+  payload: {
+    commits?: Array<{
+      sha: string
+      message: string
+    }>
+  }
+}
+
 async function getValidAccessToken(userId: string): Promise<string | null> {
   const integration = await getIntegrationByProvider(userId, 'github')
   if (!integration) return null
@@ -17,7 +44,7 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
 export async function getGitHubUser(accessToken: string) {
   const response = await fetch(`${GITHUB_API_BASE}/user`, {
     headers: {
-      Authorization: `token ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       Accept: 'application/vnd.github.v3+json',
     },
     cache: 'no-store',
@@ -30,7 +57,15 @@ export async function getGitHubUser(accessToken: string) {
   return await response.json()
 }
 
-export async function getGitHubCommits(userId: string, limit = 10) {
+interface Commit {
+  message: string
+  repo: string
+  time: string
+  sha: string
+  lines: number
+}
+
+export async function getGitHubCommits(userId: string, limit = 10): Promise<Commit[]> {
   const accessToken = await getValidAccessToken(userId)
   if (!accessToken) return []
 
@@ -38,34 +73,73 @@ export async function getGitHubCommits(userId: string, limit = 10) {
     const user = await getGitHubUser(accessToken)
     const username = user.login
 
-    const response = await fetch(`${GITHUB_API_BASE}/users/${username}/events`, {
+    // Strategy 1: Search API (Best for finding all commits by user)
+    try {
+      const searchResponse = await fetch(
+        `${GITHUB_API_BASE}/search/commits?q=author:${username}&sort=author-date&order=desc&per_page=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+          cache: 'no-store',
+        }
+      )
+
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json()
+        if (searchData.items && searchData.items.length > 0) {
+          return searchData.items.map((item: GitHubSearchCommitItem) => ({
+            message: item.commit.message,
+            repo: item.repository.full_name,
+            time: item.commit.author.date,
+            sha: item.sha,
+            lines: Math.floor(Math.random() * 100) + 1,
+          }))
+        }
+      } else {
+        console.warn('GitHub Search API failed, falling back to Events API:', searchResponse.status)
+      }
+    } catch (searchError) {
+      console.error('Error in GitHub Search API:', searchError)
+    }
+
+    // Strategy 2: Events API Fallback (Good for real-time but can miss private/rebase commits)
+    // Fetch more events to ensure we find the pushes
+    const response = await fetch(`${GITHUB_API_BASE}/users/${username}/events?per_page=100`, {
       headers: {
-        Authorization: `token ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         Accept: 'application/vnd.github.v3+json',
       },
       cache: 'no-store',
     })
 
     if (!response.ok) {
-      throw new Error('Failed to fetch GitHub events')
+      const errorData = await response.json().catch(() => ({}));
+      console.error('GitHub Events API error:', response.status, errorData);
+      return [];
     }
 
-    const events = await response.json()
+    const events = (await response.json()) as GitHubEvent[]
     if (!Array.isArray(events)) return []
 
-    const pushEvents = events.filter((e: any) => e.type === 'PushEvent')
-    
-    const commits = pushEvents.flatMap((e: any) => 
-      (e.payload.commits || []).map((c: any) => ({
-        message: c.message,
-        repo: e.repo.name,
-        time: e.created_at,
-        sha: c.sha,
-        lines: Math.floor(Math.random() * 100) + 1,
-      }))
-    )
+    // Map events to commits. We look at PushEvents primarily.
+    const commits = events
+      .filter((e: GitHubEvent) => e.type === 'PushEvent')
+      .flatMap((e: GitHubEvent) => 
+        (e.payload.commits || []).map((c: { sha: string; message: string }) => ({
+          message: c.message,
+          repo: e.repo.name,
+          time: e.created_at,
+          sha: c.sha,
+          lines: Math.floor(Math.random() * 100) + 1,
+        }))
+      )
 
-    return commits.slice(0, limit)
+    // Sort by time descending just in case
+    return commits.sort((a: Commit, b: Commit) => 
+      new Date(b.time).getTime() - new Date(a.time).getTime()
+    ).slice(0, limit)
   } catch (error) {
     console.error('Error in getGitHubCommits:', error)
     return []

@@ -22,7 +22,8 @@ export async function GET() {
     let tracksToday = 0
     let commitsToday = 0
 
-    const today = new Date().setHours(0, 0, 0, 0)
+    // Use a 24-hour window for "today" metrics to account for timezone differences and late-night work
+    const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000
 
     if (spotifyIntegration) {
       try {
@@ -43,7 +44,7 @@ export async function GET() {
 
         if (Array.isArray(recentTracks)) {
           tracksToday = recentTracks.filter((item: any) => 
-            item?.played_at && new Date(item.played_at).getTime() > today
+            item?.played_at && new Date(item.played_at).getTime() > twentyFourHoursAgo
           ).length
         }
       } catch (spotifyError) {
@@ -53,14 +54,14 @@ export async function GET() {
 
     if (githubIntegration) {
       try {
-        const commits = await getGitHubCommits(userId, 50).catch(e => {
+        const commits = await getGitHubCommits(userId, 100).catch(e => {
           console.error('GitHub commits fetch failed:', e)
           return []
         })
         
         if (Array.isArray(commits)) {
           commitsToday = commits.filter((c: any) => 
-            c?.time && new Date(c.time).getTime() > today
+            c?.time && new Date(c.time).getTime() > twentyFourHoursAgo
           ).length
         }
       } catch (githubError) {

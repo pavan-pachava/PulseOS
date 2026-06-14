@@ -30,6 +30,7 @@ export default function AnalyticsPage() {
   const [recentTracks, setRecentTracks] = useState<SpotifyTrack[]>([])
   const [recentCommits, setRecentCommits] = useState<GitHubCommit[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isUsingMockSpotify, setIsUsingMockSpotify] = useState(false)
   const [isUsingMockGitHub, setIsUsingMockGitHub] = useState(false)
 
