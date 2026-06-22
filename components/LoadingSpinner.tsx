@@ -3,21 +3,18 @@
 export function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center p-8">
-      <div className="relative w-12 h-12">
-        <div className="absolute inset-0 rounded-full border-4 border-slate-700"></div>
-        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 animate-spin"></div>
-      </div>
+      <div className="relative w-10 h-10 border-[4px] border-black bg-[#FFE600] animate-spin rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"></div>
     </div>
   )
 }
 
 export function LoadingCard() {
   return (
-    <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 animate-pulse">
+    <div className="bg-white rounded-none p-6 border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-pulse">
       <div className="space-y-3">
-        <div className="h-4 bg-slate-700 rounded w-3/4"></div>
-        <div className="h-4 bg-slate-700 rounded w-1/2"></div>
-        <div className="h-8 bg-slate-700 rounded mt-4"></div>
+        <div className="h-4 bg-black/10 rounded-none w-3/4"></div>
+        <div className="h-4 bg-black/10 rounded-none w-1/2"></div>
+        <div className="h-8 bg-black/15 rounded-none mt-4"></div>
       </div>
     </div>
   )

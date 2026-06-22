@@ -7,9 +7,9 @@ interface ErrorAlertProps {
 
 export function ErrorAlert({ title = 'Error', message }: ErrorAlertProps) {
   return (
-    <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
-      <h3 className="text-red-300 font-semibold mb-1">{title}</h3>
-      <p className="text-red-200 text-sm">{message}</p>
+    <div className="bg-[#FF5EA6] text-black border-[3px] border-black rounded-none p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <h3 className="font-extrabold text-lg mb-1 uppercase tracking-wide">⚠️ {title}</h3>
+      <p className="font-bold text-sm">{message}</p>
     </div>
   )
 }

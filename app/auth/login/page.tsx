@@ -31,7 +31,7 @@ export default function LoginPage() {
       } else if (result?.ok) {
         router.push(callbackUrl)
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
@@ -39,43 +39,45 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen neo-grid neo-glow flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-slate-800 rounded-2xl border border-slate-700 p-8">
-          <div className="flex justify-center mb-6">
-            <span className="text-5xl">⚡</span>
+        <div className="bg-white border-[3px] border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-black">
+          
+          <div className="flex justify-center mb-4">
+            <span className="text-4xl bg-[#FFE600] border-[3px] border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] select-none">⚡</span>
           </div>
-          <h1 className="text-3xl font-bold text-white text-center mb-2">PulseOS</h1>
-          <p className="text-slate-400 text-center mb-8">Your life as a living data OS</p>
+
+          <h1 className="text-3xl font-black uppercase text-center mb-1 tracking-tight">PulseOS</h1>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-700 text-center mb-6">Your life as a living data OS</p>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-900/30 border border-red-700 rounded-lg">
-              <p className="text-red-300 text-sm">{error}</p>
+            <div className="mb-6 p-4 bg-[#FF5EA6] border-2 border-black rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <p className="text-black font-bold text-xs uppercase tracking-wide">⚠️ Error: {error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-black mb-1.5">Email Node</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                className="w-full px-4 py-2 border-[3px] border-black text-black placeholder-slate-400 bg-white focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all rounded-none uppercase font-bold text-xs sm:text-sm tracking-wider"
                 required
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-black mb-1.5">Secret Key</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                className="w-full px-4 py-2 border-[3px] border-black text-black placeholder-slate-400 bg-white focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all rounded-none uppercase font-bold text-xs sm:text-sm tracking-wider"
                 required
                 disabled={isLoading}
               />
@@ -85,25 +87,26 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full"
+              className="w-full uppercase font-black tracking-wider mt-2"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Decrypting Key...' : 'Decrypt & Sign In'}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-slate-400 text-sm">
-              Don't have an account?{' '}
-              <a href="/auth/register" className="text-purple-400 hover:text-purple-300 font-semibold">
-                Sign up
+            <p className="text-slate-700 text-xs font-bold uppercase tracking-wider">
+              New node?{' '}
+              <a href="/auth/register" className="text-[#FF5EA6] hover:underline font-black">
+                Register Node
               </a>
             </p>
           </div>
 
-          <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-            <p className="text-sm text-slate-300">
-              <strong>Demo credentials:</strong> Use any email and password to create an account.
+          <div className="mt-6 p-4 bg-[#FAF9F3] border-2 border-black rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <p className="text-[10px] font-black uppercase text-slate-500 mb-1">Telemetry Sandbox Mode</p>
+            <p className="text-xs font-bold text-slate-800">
+              Demo credentials: Use any email and password combination to instantiate a new account.
             </p>
           </div>
         </div>

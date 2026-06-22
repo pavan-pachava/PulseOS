@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { getSpotifyCurrentlyPlaying, getSpotifyRecentlyPlayed } from '@/lib/spotify-api'
 import { getGitHubCommits } from '@/lib/github-api'
+import { getWakaTimeSummaries } from '@/lib/wakatime-api'
 import { getSpotifyIntegration, getIntegrationByProvider } from '@/lib/auth-service'
 
 export async function GET() {
@@ -13,19 +14,22 @@ export async function GET() {
     }
 
     const userId = session.user.id
-    const [spotifyIntegration, githubIntegration] = await Promise.all([
+    const [spotifyIntegration, githubIntegration, wakatimeIntegration] = await Promise.all([
       getSpotifyIntegration(userId),
-      getIntegrationByProvider(userId, 'github')
+      getIntegrationByProvider(userId, 'github'),
+      getIntegrationByProvider(userId, 'wakatime')
     ])
     
     let currentMood = 'Unknown'
     let tracksToday = 0
     let commitsToday = 0
+    let codingMinutesToday = 0
 
     // Filter metrics for the current calendar day (from 12:00 AM)
     const startOfDay = new Date()
     startOfDay.setHours(0, 0, 0, 0)
     const startOfDayTimestamp = startOfDay.getTime()
+    const todayStr = startOfDay.toISOString().split('T')[0]
 
     if (spotifyIntegration) {
       try {
@@ -71,7 +75,22 @@ export async function GET() {
       }
     }
 
-    const todayAtGlance = [
+    if (wakatimeIntegration) {
+      try {
+        const summaries = await getWakaTimeSummaries(userId, todayStr, todayStr).catch(e => {
+          console.error('WakaTime summaries fetch failed:', e)
+          return null
+        })
+        if (summaries) {
+          const codingSeconds = summaries.reduce((acc: number, day: any) => acc + (day.grand_total?.total_seconds || 0), 0)
+          codingMinutesToday = Math.round(codingSeconds / 60)
+        }
+      } catch (wakatimeError) {
+        console.error('WakaTime data aggregation failed:', wakatimeError)
+      }
+    }
+
+    const todayAtGlance: Array<{ label: string; value: string | number; unit: string }> = [
       { label: 'Energy Level', value: 78, unit: '%' },
       { label: 'Meeting Load', value: 5, unit: 'meetings' },
       { label: 'Current Streak', value: 12, unit: 'days' },
@@ -86,12 +105,17 @@ export async function GET() {
       todayAtGlance.push({ label: 'Commits Today', value: commitsToday, unit: 'commits' })
     }
 
+    if (wakatimeIntegration) {
+      todayAtGlance.push({ label: 'Coding Time', value: codingMinutesToday, unit: 'min' })
+    }
+
     const metrics = {
       today_at_glance: todayAtGlance,
       focus_score: 76,
       live_now: {
         spotify_connected: !!spotifyIntegration,
-        github_connected: !!githubIntegration
+        github_connected: !!githubIntegration,
+        wakatime_connected: !!wakatimeIntegration
       }
     }
 

@@ -17,43 +17,47 @@ export function Sidebar() {
   ]
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-700 p-6 h-screen flex flex-col">
-      <Link href="/dashboard/daily" className="mb-8 flex items-center gap-2">
-        <span className="text-3xl">⚡</span>
-        <span className="text-xl font-bold text-white">PulseOS</span>
-      </Link>
+    <aside className="w-64 bg-white border-r-[3px] border-black p-6 h-screen flex flex-col justify-between z-20">
+      <div className="space-y-8">
+        {/* Brand */}
+        <Link href="/dashboard/daily" className="flex items-center gap-2 bg-[#FFE600] border-2 border-black px-3 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
+          <span className="text-2xl animate-pulse">⚡</span>
+          <span className="text-lg font-black uppercase tracking-wider text-black">PulseOS</span>
+        </Link>
 
-      <nav className="space-y-2 flex-1">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`w-full px-4 py-2 rounded-lg font-medium transition-all block ${
-                isActive
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                  : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              <span className="mr-2">{item.icon}</span>
-              {item.label}
-            </Link>
-          )
-        })}
-      </nav>
+        {/* Nav list */}
+        <nav className="space-y-3">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`w-full px-4 py-2 border-2 font-bold uppercase tracking-wide text-xs sm:text-sm transition-all block rounded-none ${
+                  isActive
+                    ? 'bg-[#FF5EA6] text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] -translate-x-[1px] -translate-y-[1px]'
+                    : 'text-black border-transparent hover:border-black hover:bg-black/5'
+                }`}
+              >
+                <span className="mr-2 text-base">{item.icon}</span>
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
 
       {session?.user && (
-        <div className="border-t border-slate-700 pt-4">
-          <p className="text-sm text-slate-400 mb-3">Logged in as:</p>
-          <p className="text-white font-semibold text-sm mb-3 truncate">
+        <div className="border-t-[3px] border-black pt-4 bg-[#FAF9F3] -mx-6 -mb-6 p-6 border-l-0">
+          <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">User Node ID:</p>
+          <p className="text-black font-extrabold text-xs mb-4 truncate bg-white border border-black px-2 py-1 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
             {session.user.email}
           </p>
           <button
             onClick={() => signOut({ redirect: true, callbackUrl: '/' })}
-            className="w-full px-4 py-2 rounded-lg font-medium text-slate-300 hover:bg-slate-800 transition-all"
+            className="w-full px-4 py-2 border-2 border-black font-bold text-xs uppercase bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all text-center block"
           >
-            🚪 Logout
+            🚪 Sign Out
           </button>
         </div>
       )}

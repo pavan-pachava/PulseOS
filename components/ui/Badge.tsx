@@ -3,18 +3,19 @@
 interface BadgeProps {
   children: React.ReactNode
   variant?: 'default' | 'success' | 'warning' | 'info'
+  className?: string
 }
 
-export function Badge({ children, variant = 'default' }: BadgeProps) {
+export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
   const variants = {
-    default: 'bg-slate-700 text-slate-200',
-    success: 'bg-green-900 text-green-200',
-    warning: 'bg-yellow-900 text-yellow-200',
-    info: 'bg-blue-900 text-blue-200',
+    default: 'bg-black text-white',
+    success: 'bg-[#00E5FF] text-black', // cyan
+    warning: 'bg-[#FFE600] text-black', // yellow
+    info: 'bg-[#FF5EA6] text-black', // pink
   }
 
   return (
-    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${variants[variant]}`}>
+    <span className={`inline-block px-3 py-1 border-2 border-black rounded-none text-xs font-bold uppercase tracking-wider ${variants[variant]} ${className}`}>
       {children}
     </span>
   )

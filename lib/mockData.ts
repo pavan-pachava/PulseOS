@@ -46,10 +46,10 @@ export const mockIntegrations = [
   },
   {
     id: 'wakatime',
-    name: 'Wakatime (optional)',
+    name: 'Wakatime',
     description: 'Precise coding time per language and project — more granular than GitHub commits alone',
     icon: '⏱️',
-    badge: 'REST',
+    badge: 'OAuth',
     connected: false,
     metrics: { coding_hours: 0, languages: 0 },
   },

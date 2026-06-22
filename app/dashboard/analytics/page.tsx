@@ -37,6 +37,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     async function fetchAnalytics() {
       setLoading(true)
+      setError(null)
       
       // Fetch Spotify
       try {
@@ -92,10 +93,10 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 text-black">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Deep Analytics</h1>
-          <p className="text-slate-400">Loading your history...</p>
+          <h1 className="text-3xl font-black uppercase tracking-tight mb-2">Deep Analytics</h1>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Loading your history...</p>
         </div>
         <LoadingCard />
       </div>
@@ -103,49 +104,57 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-black animate-fadeIn">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-4xl font-bold text-white">Deep Analytics</h1>
+        <div className="flex items-center gap-3 mb-2 flex-wrap">
+          <h1 className="text-4xl font-black uppercase tracking-tight text-black">Deep Analytics</h1>
           {(isUsingMockSpotify || isUsingMockGitHub) && (
             <Badge variant="warning">
-              {isUsingMockSpotify && isUsingMockGitHub ? 'Mock Data' : isUsingMockSpotify ? 'Mock Spotify' : 'Mock GitHub'}
+              {isUsingMockSpotify && isUsingMockGitHub ? 'Mock Telemetry' : isUsingMockSpotify ? 'Mock Spotify' : 'Mock GitHub'}
             </Badge>
           )}
           {(!isUsingMockSpotify && !isUsingMockGitHub) && (
-            <Badge variant="success">Live Data</Badge>
+            <Badge variant="success">Live Telemetry</Badge>
           )}
         </div>
-        <p className="text-slate-400">Charts and breakdowns for the data-curious</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Charts and breakdowns for the data-curious</p>
       </div>
 
       {error && <ErrorAlert message={error} />}
 
       {/* Listening Timeline */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Listening Timeline</h2>
-          {!isUsingMockSpotify && <span className="text-sm text-slate-400">{recentTracks.length} recent tracks</span>}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-black uppercase tracking-tight text-black">Listening Timeline</h2>
+          {!isUsingMockSpotify && (
+            <span className="text-xs font-black uppercase bg-[#FFE600] border-2 border-black px-2 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+              {recentTracks.length} tracks sync&apos;d
+            </span>
+          )}
         </div>
         <Card>
-          <p className="text-sm text-slate-400 mb-4">Full history of what you listened to, when, for how long.</p>
-          <div className="mt-6 space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          <p className="text-xs sm:text-sm font-bold text-slate-700 mb-4">Full log telemetry of listened music, duration, and timestamps.</p>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar border-t-[3px] border-black pt-4">
             {recentTracks.length > 0 ? (
               recentTracks.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    {item.track.image && (
-                      <img src={item.track.image} alt="Album" className="w-10 h-10 rounded shadow" />
+                <div key={idx} className="flex items-center justify-between p-3 bg-white border-2 border-black rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {item.track.image ? (
+                      <img src={item.track.image} alt="Album" className="w-10 h-10 border-2 border-black rounded-none shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] select-none" />
+                    ) : (
+                      <div className="w-10 h-10 bg-[#FAF9F3] border-2 border-black flex items-center justify-center font-bold text-lg select-none">🎵</div>
                     )}
-                    <div>
-                      <p className="font-semibold text-white leading-tight">{item.track.name}</p>
-                      <p className="text-xs text-slate-400">{item.track.artist}</p>
+                    <div className="overflow-hidden">
+                      <p className="font-extrabold text-black text-sm truncate leading-tight">{item.track.name}</p>
+                      <p className="text-xs font-semibold text-slate-600 truncate mt-0.5">{item.track.artist}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-white font-mono">{Math.floor(item.track.duration_ms / 60000)}:{(Math.floor((item.track.duration_ms % 60000) / 1000)).toString().padStart(2, '0')}</p>
-                    <p className="text-[10px] text-slate-500">
+                  <div className="text-right ml-4 shrink-0">
+                    <p className="text-xs text-black font-extrabold font-mono">
+                      {Math.floor(item.track.duration_ms / 60000)}:{(Math.floor((item.track.duration_ms % 60000) / 1000)).toString().padStart(2, '0')}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
                       {isNaN(new Date(item.played_at).getTime()) 
                         ? item.played_at 
                         : new Date(item.played_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -154,8 +163,8 @@ export default function AnalyticsPage() {
                 </div>
               ))
             ) : (
-              <p className="text-slate-400 text-sm text-center py-4">
-                {isUsingMockSpotify ? 'Connect Spotify to see your listening history' : 'No recent listening activity found'}
+              <p className="text-slate-700 font-bold text-center py-4">
+                Connect Spotify to visualize telemetry history.
               </p>
             )}
           </div>
@@ -163,31 +172,41 @@ export default function AnalyticsPage() {
       </section>
 
       {/* Coding Timeline */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Coding Timeline</h2>
-          {!isUsingMockGitHub && <span className="text-sm text-slate-400">{recentCommits.length} recent commits</span>}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-black uppercase tracking-tight text-black">Coding Timeline</h2>
+          {!isUsingMockGitHub && (
+            <span className="text-xs font-black uppercase bg-[#FF5EA6] border-2 border-black px-2 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+              {recentCommits.length} commits sync&apos;d
+            </span>
+          )}
         </div>
         <Card>
-          <p className="text-sm text-slate-400 mb-4">Commit frequency over time, language breakdown per month, most productive repos, commit message tone trend</p>
-          <div className="mt-6 space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          <p className="text-xs sm:text-sm font-bold text-slate-700 mb-4">Commit logs, repository loads, language indicators, and volume changes.</p>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar border-t-[3px] border-black pt-4">
             {recentCommits.length > 0 ? (
               recentCommits.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
-                  <div>
-                    <p className="font-semibold text-white leading-tight">{item.message}</p>
-                    <p className="text-xs text-slate-400 mt-1">{item.repo} • {
-                      isNaN(new Date(item.time).getTime()) 
-                        ? item.time 
-                        : new Date(item.time).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                    }</p>
+                <div key={idx} className="flex items-center justify-between p-3 bg-white border-2 border-black rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
+                  <div className="overflow-hidden">
+                    <p className="font-extrabold text-black text-sm truncate leading-tight">{item.message}</p>
+                    <p className="text-xs font-semibold text-slate-600 mt-1 uppercase tracking-wider truncate">
+                      {item.repo} • {
+                        isNaN(new Date(item.time).getTime()) 
+                          ? item.time 
+                          : new Date(item.time).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                      }
+                    </p>
                   </div>
-                  <p className="text-sm font-mono text-green-400">+{item.lines}</p>
+                  <div className="ml-4 shrink-0 text-right">
+                    <span className="text-xs font-black uppercase bg-[#B2FF00] border-2 border-black px-1.5 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                      +{item.lines} lines
+                    </span>
+                  </div>
                 </div>
               ))
             ) : (
-              <p className="text-slate-400 text-sm text-center py-4">
-                {isUsingMockGitHub ? 'Connect GitHub to see your coding history' : 'No recent commits found'}
+              <p className="text-slate-700 font-bold text-center py-4">
+                Connect GitHub to visualize coding activity logs.
               </p>
             )}
           </div>
@@ -195,50 +214,57 @@ export default function AnalyticsPage() {
       </section>
 
       {/* Time Allocation Breakdown */}
-      <section>
-        <h2 className="text-xl font-bold text-white mb-4">Time Allocation Breakdown</h2>
+      <section className="space-y-4">
+        <h2 className="text-xl font-black uppercase tracking-tight text-black">Time Allocation Breakdown</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <p className="text-sm text-slate-400 mb-4">How your calendar time is actually spent: meetings vs deep work vs buffer. Weekly and monthly views.</p>
-            <Badge>Calendar API</Badge>
+          <Card className="flex flex-col justify-between p-6">
+            <div>
+              <h3 className="font-black uppercase text-sm mb-2">Calendar Telemetry</h3>
+              <p className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed mb-6">
+                Allocation spent in focus slots versus meetings vs. buffer windows. Sync status tracks Google Calendar events.
+              </p>
+            </div>
+            <div>
+              <Badge variant="info">Calendar API Sync</Badge>
+            </div>
           </Card>
 
-          <Card>
+          <Card className="p-6">
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-slate-300">Deep Work</span>
-                  <span className="font-bold text-white">{totalCodingTime}%</span>
+                <div className="flex justify-between items-center mb-1.5 font-black uppercase text-xs">
+                  <span>Deep Work</span>
+                  <span className="bg-white border border-black px-1 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">{totalCodingTime}%</span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-3">
+                <div className="w-full bg-white border-2 border-black rounded-none h-4 overflow-hidden shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   <div
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 h-full rounded-full"
+                    className="bg-[#00E5FF] border-r-2 border-black h-full"
                     style={{ width: `${totalCodingTime}%` }}
                   ></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-slate-300">Meetings</span>
-                  <span className="font-bold text-white">{totalMeetingTime}%</span>
+                <div className="flex justify-between items-center mb-1.5 font-black uppercase text-xs">
+                  <span>Meetings</span>
+                  <span className="bg-white border border-black px-1 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">{totalMeetingTime}%</span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-3">
+                <div className="w-full bg-white border-2 border-black rounded-none h-4 overflow-hidden shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   <div
-                    className="bg-gradient-to-r from-orange-600 to-red-600 h-full rounded-full"
+                    className="bg-[#FF5EA6] border-r-2 border-black h-full"
                     style={{ width: `${totalMeetingTime}%` }}
                   ></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-slate-300">Buffer</span>
-                  <span className="font-bold text-white">{totalBuffer}%</span>
+                <div className="flex justify-between items-center mb-1.5 font-black uppercase text-xs">
+                  <span>Buffer / Switch</span>
+                  <span className="bg-white border border-black px-1 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">{totalBuffer}%</span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-3">
+                <div className="w-full bg-white border-2 border-black rounded-none h-4 overflow-hidden shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   <div
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full"
+                    className="bg-[#FFE600] border-r-2 border-black h-full"
                     style={{ width: `${totalBuffer}%` }}
                   ></div>
                 </div>
@@ -251,41 +277,54 @@ export default function AnalyticsPage() {
       {/* Retrospectives */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Monthly */}
-        <Card>
-          <h3 className="text-lg font-bold text-white mb-3">Monthly Retrospective</h3>
-          <Badge className="mb-4">AI-generated</Badge>
-          <div className="space-y-3 text-slate-300 text-sm">
-            <p>✨ <strong>Top 5 moments:</strong> Deep focus sessions, completed project launch</p>
-            <p>📈 <strong>Biggest change:</strong> 30% increase in evening commits</p>
-            <p>🎯 <strong>Goal progress:</strong> 85% on Q2 targets</p>
-            <p>🔥 <strong>Streak records:</strong> Best coding streak: 8 days</p>
+        <Card className="flex flex-col justify-between p-6">
+          <div>
+            <h3 className="text-lg font-black uppercase tracking-tight text-black mb-1">Monthly Retrospective</h3>
+            <p className="text-[10px] font-black uppercase text-slate-500 mb-4">Quantified review</p>
+            <div className="space-y-3 font-bold text-xs sm:text-sm text-slate-880">
+              <p>✨ <strong>Top 5 moments:</strong> Deep focus sessions, completed project launch</p>
+              <p>📈 <strong>Biggest change:</strong> 30% increase in evening commits</p>
+              <p>🎯 <strong>Goal progress:</strong> 85% on Q2 targets</p>
+              <p>🔥 <strong>Streak records:</strong> Best coding streak: 8 days</p>
+            </div>
+          </div>
+          <div className="pt-6">
+            <Badge variant="success">AI-Generated</Badge>
           </div>
         </Card>
 
         {/* Yearly */}
-        <Card>
-          <h3 className="text-lg font-bold text-white mb-3">Year in Review</h3>
-          <Badge className="mb-4">annual</Badge>
-          <div className="space-y-3 text-slate-300 text-sm">
-            <p className="font-semibold text-white">Like Spotify Wrapped but for your entire life</p>
-            <p>💻 <strong>Coding Year:</strong> 1,200 commits across 45 repos</p>
-            <p>🎵 <strong>Music Year:</strong> 2,400 hours, top genre: Synthwave</p>
-            <p>📊 <strong>Productivity Year:</strong> 847 focused days, 120 correlation discoveries</p>
-            <p>🏆 <strong>Best Month:</strong> March with 92 average focus score</p>
+        <Card className="flex flex-col justify-between p-6">
+          <div>
+            <h3 className="text-lg font-black uppercase tracking-tight text-black mb-1">Year in Review</h3>
+            <p className="text-[10px] font-black uppercase text-slate-500 mb-4">Telemetry wrap</p>
+            <div className="space-y-3 font-bold text-xs sm:text-sm text-slate-800">
+              <p className="font-extrabold text-black uppercase text-xs">Wrapped analytics summary</p>
+              <p>💻 <strong>Coding telemetry:</strong> 1,200 commits across 45 repos</p>
+              <p>🎵 <strong>Music telemetry:</strong> 2,400 hours, top genre: Synthwave</p>
+              <p>📊 <strong>Productivity telemetry:</strong> 847 focus scores calculated</p>
+              <p>🏆 <strong>Best period:</strong> March with 92 average focus score</p>
+            </div>
+          </div>
+          <div className="pt-6">
+            <Badge variant="default">Annual Wrap</Badge>
           </div>
         </Card>
       </div>
 
       {/* Custom Metric Builder */}
-      <Card>
-        <h3 className="text-lg font-bold text-white mb-2">Custom Metric Builder</h3>
-        <p className="text-slate-300 text-sm mb-4">
-          Power-user feature: define your own composite metric from any data sources.
+      <Card className="p-6">
+        <h3 className="text-lg font-black uppercase tracking-tight text-black mb-2">Custom Metric Builder</h3>
+        <p className="text-xs sm:text-sm font-bold text-slate-700 mb-4">
+          Composite index compiler: construct unique telemetry variables from combined input logs.
         </p>
-        <div className="bg-slate-700/50 p-4 rounded-lg font-mono text-xs text-slate-300 mb-4">
-          <p className="text-purple-400">Focus Score = commits × (1 - meeting_ratio) × music_energy</p>
+        <div className="bg-white border-2 border-black p-4 font-mono font-bold text-xs text-[#FF5EA6] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-4">
+          <p className="uppercase tracking-wide">Calculated Index Formula</p>
+          <p className="mt-1 text-black font-extrabold">Focus_Score = commits × (1.0 - meeting_ratio) × music_tempo_energy</p>
         </div>
-        <Badge>advanced</Badge>
+        <div>
+          <Badge variant="info">Advanced Node Config</Badge>
+        </div>
       </Card>
     </div>
   )

@@ -22,6 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       name: 'Alex Johnson',
       email: email,
     })
+    // Prevent unused variable compilation error
+    if (!password) return
   }
 
   const logout = () => {

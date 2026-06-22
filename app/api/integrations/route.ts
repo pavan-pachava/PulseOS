@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth'
 import { getUserIntegrations } from '@/lib/auth-service'
 import { buildSpotifyAuthUrl, getSpotifyRecentlyPlayed } from '@/lib/spotify-api'
 import { buildGitHubAuthUrl, getGitHubCommits } from '@/lib/github-api'
+import { buildWakaTimeAuthUrl, getWakaTimeSummaries } from '@/lib/wakatime-api'
 
 export async function GET() {
   try {
@@ -18,6 +19,7 @@ export async function GET() {
     const startOfDay = new Date()
     startOfDay.setHours(0, 0, 0, 0)
     const startOfDayTimestamp = startOfDay.getTime()
+    const todayStr = startOfDay.toISOString().split('T')[0]
     
     const enrichedIntegrations = await Promise.all(integrations.map(async (integration: any) => {
       if (integration.provider === 'spotify') {
@@ -40,6 +42,16 @@ export async function GET() {
           return integration
         }
       }
+      if (integration.provider === 'wakatime') {
+        try {
+          const summaries = await getWakaTimeSummaries(session.user.id, todayStr, todayStr)
+          const codingSeconds = summaries?.reduce((acc: number, day: any) => acc + (day.grand_total?.total_seconds || 0), 0) || 0
+          return { ...integration, coding_minutes_today: Math.round(codingSeconds / 60) }
+        } catch (e) {
+          console.error('Failed to fetch wakatime metrics:', e)
+          return integration
+        }
+      }
       return integration
     }))
 
@@ -52,6 +64,7 @@ export async function GET() {
         expires_at: integration.expires_at,
         tracks_today: integration.tracks_today,
         commits_today: integration.commits_today,
+        coding_minutes_today: integration.coding_minutes_today,
       })),
     })
   } catch (error) {
@@ -81,6 +94,11 @@ export async function POST(request: NextRequest) {
 
     if (provider === 'github') {
       const authUrl = buildGitHubAuthUrl()
+      return NextResponse.json({ auth_url: authUrl })
+    }
+
+    if (provider === 'wakatime') {
+      const authUrl = buildWakaTimeAuthUrl()
       return NextResponse.json({ auth_url: authUrl })
     }
 
