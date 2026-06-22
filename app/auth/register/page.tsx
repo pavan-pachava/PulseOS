@@ -85,7 +85,7 @@ export default function RegisterPage() {
         <div className="bg-white border-[3px] border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-black">
           
           <div className="flex justify-center mb-4">
-            <img src="/logo.jpg" alt="Logo" className="w-16 h-16 object-cover rounded-none" />
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-cover rounded-none" />
           </div>
           
           <h1 className="text-3xl font-black uppercase text-center mb-1 tracking-tight">Create Node</h1>

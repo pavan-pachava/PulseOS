@@ -40,7 +40,7 @@ export default function Home() {
           <div className="flex items-center bg-white border-[3px] border-black p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span>
             <span className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-              <img src="/logo.jpg" alt="Logo" className="w-5 h-5 object-cover rounded-none" />
+              <img src="/logo.png" alt="Logo" className="w-5 h-5 object-cover rounded-none" />
               PulseOS
             </span>
           </div>
@@ -76,14 +76,10 @@ export default function Home() {
               <br />
               <span className="text-[#FF5EA6] flex items-center justify-center gap-2">
                 Operating System
-                <img src="/logo.jpg" alt="Logo" className="w-8 h-8 inline-block animate-pulse object-cover rounded-none" />
               </span>
             </h1>
 
-            {/* Rotated Beta Version Badge */}
-            <div className="absolute -bottom-4 right-4 sm:right-8 bg-black text-[#FFE600] text-xs font-black uppercase tracking-widest px-3 py-1.5 border-[3px] border-black rotate-[-2deg] shadow-[2px_2px_0px_0px_rgba(255,94,166,1)]">
-              Beta Version v1.0
-            </div>
+            
           </div>
 
           {/* Subtitle */}
@@ -165,7 +161,7 @@ export default function Home() {
             </div>
             <h2 className="text-3xl font-black uppercase tracking-tight">Plug-and-Play Integrations</h2>
             <p className="text-sm font-bold text-slate-600 max-w-md mx-auto">
-              PulseOS connects securely to the services you already run every day.
+              PulseOS connects securely to the services you run every day.
             </p>
           </div>
 
@@ -253,7 +249,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-4 border-t-[3px] border-black mt-20 pt-8 flex flex-col sm:flex-row justify-between items-center text-xs font-bold uppercase text-slate-700 tracking-wider gap-4">
         <p className="flex items-center gap-1.5">
-          <img src="/logo.jpg" alt="Logo" className="w-4 h-4 object-cover rounded-none" />
+          <img src="/logo.png" alt="Logo" className="w-4 h-4 object-cover rounded-none" />
           PulseOS Kernel — All vectors operating within normal limits.
         </p>
         <p>© {new Date().getFullYear()} PulseOS Corp. All telemetry protected.</p>

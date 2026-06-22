@@ -21,7 +21,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-slate-800 rounded-2xl border border-slate-700 p-8">
           <div className="flex justify-center mb-6">
-            <img src="/logo.jpg" alt="Logo" className="w-16 h-16 object-cover rounded-none" />
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-cover rounded-none" />
           </div>
           <h1 className="text-3xl font-bold text-white text-center mb-2">PulseOS</h1>
           <p className="text-slate-400 text-center mb-8">Your life as a living data OS</p>

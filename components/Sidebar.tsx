@@ -21,7 +21,7 @@ export function Sidebar() {
       <div className="space-y-8">
         {/* Brand */}
         <Link href="/dashboard/daily" className="flex items-center gap-2 bg-[#FFE600] border-2 border-black px-3 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
-          <img src="/logo.jpg" alt="Logo" className="w-6 h-6 animate-pulse object-cover rounded-none" />
+          <img src="/logo.png" alt="Logo" className="w-6 h-6 animate-pulse object-cover rounded-none" />
           <span className="text-lg font-black uppercase tracking-wider text-black">PulseOS</span>
         </Link>
 
