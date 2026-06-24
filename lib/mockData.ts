@@ -24,7 +24,7 @@ export const mockIntegrations = [
     icon: '🌤️',
     badge: 'REST',
     connected: true,
-    metrics: { temp_avg: '72°F', humidity: 65, uv_index: 6 },
+    metrics: { temp_avg: '22°C', humidity: 65, rain: '0 mm' },
   },
   {
     id: 'wakatime',
@@ -40,22 +40,18 @@ export const mockIntegrations = [
 export const mockDailyMetrics = {
   today_at_glance: [
     { label: 'Energy Level', value: 78, unit: '%' },
-    { label: 'Meeting Load', value: 5, unit: 'meetings' },
     { label: 'Current Streak', value: 12, unit: 'days' },
-    { label: 'Coding Minutes', value: 240, unit: 'min' },
-    { label: 'Listening Mood', value: 'Energetic', unit: 'mood' },
+    { label: 'Tracks Today', value: '-', unit: 'songs' },
+    { label: 'Commits Today', value: '-', unit: 'commits' },
+    { label: 'Coding Time', value: '-', unit: 'min' },
   ],
-  morning_briefing: 'Yesterday was a high-focus day. Heavy meetings today. Your best work happens before noon.',
+  morning_briefing: 'Yesterday was a high-focus day. Your best work happens before noon.',
   live_now: {
     currently_playing: 'Synthwave - Night Drive',
     focus_mode: true,
-    next_meeting: '2:00 PM - Team Sync',
-    time_until: '45 minutes',
   },
   streaks: [
     { name: 'Coding Days', current: 12, best: 24, icon: '💻' },
-    { name: 'Daily Check-ins', current: 7, best: 15, icon: '📝' },
-    { name: 'Calendar Hygiene', current: 3, best: 8, icon: '📅' },
   ],
   week_heatmap: [
     { day: 'Mon', score: 92, label: 'Excellent' },
@@ -97,7 +93,7 @@ export const mockCorrelationInsights = [
   {
     id: 3,
     title: 'Meeting Load → Code Quality',
-    description: 'Correlates calendar density with commit message length, PR size, and bug-fix ratio. Quantifies meeting tax.',
+    description: 'Correlates meeting density with commit message length, PR size, and bug-fix ratio. Quantifies meeting tax.',
     badge: 'regression',
     icon: '📊',
     correlation: -0.71,

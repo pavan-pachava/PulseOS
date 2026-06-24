@@ -59,6 +59,10 @@ export default function ProfilePage() {
     fetchData()
   }, [])
 
+  const visibleIntegrations = integrations.filter(
+    (i) => i.provider !== 'weather' && i.provider !== 'google-calendar' && i.provider !== 'calendar'
+  )
+
   if (loading) {
     return (
       <div className="space-y-8 text-black">
@@ -104,9 +108,9 @@ export default function ProfilePage() {
       {/* Connected Integrations */}
       <section className="space-y-4">
         <h2 className="text-2xl font-black uppercase tracking-tight text-black">Connected Integrations</h2>
-        {integrations.length > 0 ? (
+        {visibleIntegrations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {integrations.map((integration) => {
+            {visibleIntegrations.map((integration) => {
               const mockInt = mockIntegrations.find(i => i.id === integration.provider)
               const displayName = mockInt?.name || integration.provider
 

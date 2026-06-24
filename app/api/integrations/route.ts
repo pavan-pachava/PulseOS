@@ -4,6 +4,9 @@ import { getUserIntegrations, deleteIntegration, saveIntegration } from '@/lib/a
 import { buildSpotifyAuthUrl, getSpotifyRecentlyPlayed } from '@/lib/spotify-api'
 import { buildGitHubAuthUrl, getGitHubCommits } from '@/lib/github-api'
 import { buildWakaTimeAuthUrl, getWakaTimeSummaries } from '@/lib/wakatime-api'
+import { getCityCoordinates, getWeatherData } from '@/lib/weather-api'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -15,7 +18,7 @@ export async function GET() {
 
     const integrations = await getUserIntegrations(session.user.id)
     
-    // Filter metrics for the current calendar day (from 12:00 AM)
+    // Filter metrics for the current day (from 12:00 AM)
     const startOfDay = new Date()
     startOfDay.setHours(0, 0, 0, 0)
     const startOfDayTimestamp = startOfDay.getTime()
@@ -52,21 +55,51 @@ export async function GET() {
           return integration
         }
       }
+      if (integration.provider === 'weather') {
+        try {
+          const city = integration.access_token || 'San Francisco'
+          let lat = 37.7749
+          let lon = -122.4194
+          if (integration.refresh_token) {
+            const [latStr, lonStr] = integration.refresh_token.split(',')
+            lat = parseFloat(latStr)
+            lon = parseFloat(lonStr)
+          }
+          const weather = await getWeatherData(lat, lon, city)
+          return {
+            ...integration,
+            temp_avg: weather.temp,
+            humidity: weather.humidity,
+            rain: weather.rain,
+            updated_at: new Date().toISOString(),
+          }
+        } catch (e) {
+          console.error('Failed to fetch weather metrics:', e)
+          return integration
+        }
+      }
       return integration
     }))
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       integrations: enrichedIntegrations.map((integration: any) => ({
         id: integration.id,
         provider: integration.provider,
+        access_token: integration.access_token,
+        refresh_token: integration.refresh_token,
         connected_at: integration.connected_at,
         updated_at: integration.updated_at,
         expires_at: integration.expires_at,
         tracks_today: integration.tracks_today,
         commits_today: integration.commits_today,
         coding_minutes_today: integration.coding_minutes_today,
+        temp_avg: integration.temp_avg,
+        humidity: integration.humidity,
+        rain: integration.rain,
       })),
     })
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate')
+    return response
   } catch (error) {
     console.error('Get integrations error:', error)
     return NextResponse.json(
@@ -100,6 +133,33 @@ export async function POST(request: NextRequest) {
     if (provider === 'wakatime') {
       const authUrl = buildWakaTimeAuthUrl()
       return NextResponse.json({ auth_url: authUrl })
+    }
+
+    if (provider === 'weather') {
+      const { city, latitude, longitude, fullName } = body
+      
+      let lat = latitude
+      let lon = longitude
+      let name = fullName || city
+      
+      if (lat === undefined || lon === undefined) {
+        if (!city) {
+          return NextResponse.json({ error: 'City or coordinates are required' }, { status: 400 })
+        }
+        const coords = await getCityCoordinates(city)
+        lat = coords.latitude
+        lon = coords.longitude
+        name = coords.name
+      }
+      
+      await saveIntegration(
+        session.user.id,
+        'weather',
+        name,
+        `${lat},${lon}`,
+        null
+      )
+      return NextResponse.json({ success: true })
     }
 
 

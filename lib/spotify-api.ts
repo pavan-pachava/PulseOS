@@ -148,6 +148,7 @@ export function buildSpotifyAuthUrl(): string {
       'user-read-recently-played',
       'user-top-read',
       'user-library-read',
+      'user-modify-playback-state',
     ].join(' '),
   })
 
@@ -176,4 +177,44 @@ export async function exchangeSpotifyCode(code: string): Promise<SpotifyTokenRes
   }
 
   return (await response.json()) as SpotifyTokenResponse
+}
+
+export async function spotifyControlPlayback(userId: string, action: 'play' | 'pause' | 'next' | 'previous') {
+  const accessToken = await getValidAccessToken(userId)
+  if (!accessToken) throw new Error('Spotify not integrated')
+
+  let url = ''
+  let method = 'POST'
+
+  if (action === 'play') {
+    url = `${SPOTIFY_API_BASE}/me/player/play`
+    method = 'PUT'
+  } else if (action === 'pause') {
+    url = `${SPOTIFY_API_BASE}/me/player/pause`
+    method = 'PUT'
+  } else if (action === 'next') {
+    url = `${SPOTIFY_API_BASE}/me/player/next`
+    method = 'POST'
+  } else if (action === 'previous') {
+    url = `${SPOTIFY_API_BASE}/me/player/previous`
+    method = 'POST'
+  }
+
+  const response = await fetch(url, {
+    method,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('No active Spotify player found. Open Spotify and play a track first!')
+    }
+    const errData = await response.json().catch(() => ({}))
+    const msg = errData?.error?.message || 'Failed to control playback'
+    throw new Error(msg)
+  }
+
+  return { success: true }
 }

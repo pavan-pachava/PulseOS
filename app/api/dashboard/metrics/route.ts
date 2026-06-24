@@ -25,7 +25,7 @@ export async function GET() {
     let commitsToday = 0
     let codingMinutesToday = 0
 
-    // Filter metrics for the current calendar day (from 12:00 AM)
+    // Filter metrics for the current day (from 12:00 AM)
     const startOfDay = new Date()
     startOfDay.setHours(0, 0, 0, 0)
     const startOfDayTimestamp = startOfDay.getTime()
@@ -93,20 +93,10 @@ export async function GET() {
     const todayAtGlance: Array<{ label: string; value: string | number; unit: string }> = [
       { label: 'Energy Level', value: 78, unit: '%' },
       { label: 'Current Streak', value: 12, unit: 'days' },
+      { label: 'Tracks Today', value: spotifyIntegration ? tracksToday : '-', unit: 'songs' },
+      { label: 'Commits Today', value: githubIntegration ? commitsToday : '-', unit: 'commits' },
+      { label: 'Coding Time', value: wakatimeIntegration ? codingMinutesToday : '-', unit: 'min' }
     ]
-
-    if (spotifyIntegration) {
-      todayAtGlance.push({ label: 'Tracks Today', value: tracksToday, unit: 'songs' })
-      todayAtGlance.push({ label: 'Listening Mood', value: currentMood, unit: 'mood' })
-    }
-
-    if (githubIntegration) {
-      todayAtGlance.push({ label: 'Commits Today', value: commitsToday, unit: 'commits' })
-    }
-
-    if (wakatimeIntegration) {
-      todayAtGlance.push({ label: 'Coding Time', value: codingMinutesToday, unit: 'min' })
-    }
 
     const metrics = {
       today_at_glance: todayAtGlance,

@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { LoadingCard } from '@/components/LoadingSpinner'
 import { ErrorAlert } from '@/components/ErrorAlert'
-import { mockAnalyticsData } from '@/lib/mockData'
 import { useEffect, useState } from 'react'
 
 interface SpotifyTrack {
@@ -31,8 +30,6 @@ export default function AnalyticsPage() {
   const [recentCommits, setRecentCommits] = useState<GitHubCommit[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isUsingMockSpotify, setIsUsingMockSpotify] = useState(false)
-  const [isUsingMockGitHub, setIsUsingMockGitHub] = useState(false)
 
   useEffect(() => {
     async function fetchAnalytics() {
@@ -42,43 +39,29 @@ export default function AnalyticsPage() {
       // Fetch Spotify
       try {
         const res = await fetch('/api/data/spotify/history?limit=20')
-        const data = await res.json()
-        if (data.items) {
-          setRecentTracks(data.items)
-          setIsUsingMockSpotify(false)
+        if (res.ok) {
+          const data = await res.json()
+          setRecentTracks(data.items || [])
         } else {
-          throw new Error('Invalid response')
+          setRecentTracks([])
         }
       } catch (err) {
-        console.error('Spotify fetch failed, using mock:', err)
-        setIsUsingMockSpotify(true)
-        setRecentTracks(mockAnalyticsData.listening_timeline.recent.map(item => ({
-          track: {
-            id: '',
-            name: item.track,
-            artist: item.artist,
-            album: 'Mock Album',
-            image: '',
-            duration_ms: item.duration * 60000,
-          },
-          played_at: item.time,
-        })))
+        console.error('Spotify fetch failed:', err)
+        setRecentTracks([])
       }
 
       // Fetch GitHub
       try {
         const res = await fetch('/api/data/github/history?limit=10')
-        const data = await res.json()
-        if (data.items) {
-          setRecentCommits(data.items)
-          setIsUsingMockGitHub(false)
+        if (res.ok) {
+          const data = await res.json()
+          setRecentCommits(data.items || [])
         } else {
-          throw new Error('Invalid response')
+          setRecentCommits([])
         }
       } catch (err) {
-        console.error('GitHub fetch failed, using mock:', err)
-        setIsUsingMockGitHub(true)
-        setRecentCommits(mockAnalyticsData.coding_timeline.recent)
+        console.error('GitHub fetch failed:', err)
+        setRecentCommits([])
       }
 
       setLoading(false)
@@ -86,10 +69,6 @@ export default function AnalyticsPage() {
 
     fetchAnalytics()
   }, [])
-
-  const totalCodingTime = mockAnalyticsData.time_allocation.deep_work
-  const totalMeetingTime = mockAnalyticsData.time_allocation.meetings
-  const totalBuffer = mockAnalyticsData.time_allocation.buffer
 
   if (loading) {
     return (
@@ -109,13 +88,10 @@ export default function AnalyticsPage() {
       <div>
         <div className="flex items-center gap-3 mb-2 flex-wrap">
           <h1 className="text-4xl font-black uppercase tracking-tight text-black">Deep Analytics</h1>
-          {(isUsingMockSpotify || isUsingMockGitHub) && (
-            <Badge variant="warning">
-              {isUsingMockSpotify && isUsingMockGitHub ? 'Mock Telemetry' : isUsingMockSpotify ? 'Mock Spotify' : 'Mock GitHub'}
-            </Badge>
-          )}
-          {(!isUsingMockSpotify && !isUsingMockGitHub) && (
+          {recentTracks.length > 0 || recentCommits.length > 0 ? (
             <Badge variant="success">Live Telemetry</Badge>
+          ) : (
+            <Badge variant="default">Offline</Badge>
           )}
         </div>
         <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Charts and breakdowns for the data-curious</p>
@@ -127,7 +103,7 @@ export default function AnalyticsPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black uppercase tracking-tight text-black">Listening Timeline</h2>
-          {!isUsingMockSpotify && (
+          {recentTracks.length > 0 && (
             <span className="text-xs font-black uppercase bg-[#FFE600] border-2 border-black px-2 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
               {recentTracks.length} tracks sync&apos;d
             </span>
@@ -177,7 +153,7 @@ export default function AnalyticsPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black uppercase tracking-tight text-black">Coding Timeline</h2>
-          {!isUsingMockGitHub && (
+          {recentCommits.length > 0 && (
             <span className="text-xs font-black uppercase bg-[#FF5EA6] border-2 border-black px-2 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
               {recentCommits.length} commits sync&apos;d
             </span>

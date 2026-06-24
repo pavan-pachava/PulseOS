@@ -100,7 +100,7 @@ export async function getSpotifyIntegration(userId: string) {
 
 export async function getUserIntegrations(userId: string) {
   const result = await db`
-    SELECT id, provider, connected_at, updated_at, expires_at
+    SELECT id, provider, access_token, refresh_token, connected_at, updated_at, expires_at
     FROM integrations
     WHERE user_id = ${userId}
   `
