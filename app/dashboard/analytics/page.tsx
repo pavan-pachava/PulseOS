@@ -200,11 +200,15 @@ export default function AnalyticsPage() {
           <div>
             <h3 className="text-lg font-black uppercase tracking-tight text-black mb-1">Monthly Retrospective</h3>
             <p className="text-[10px] font-black uppercase text-slate-500 mb-4">Quantified review</p>
-            <div className="space-y-3 font-bold text-xs sm:text-sm text-slate-880">
-              <p>✨ <strong>Top 5 moments:</strong> Deep focus sessions, completed project launch</p>
-              <p>📈 <strong>Biggest change:</strong> 30% increase in evening commits</p>
-              <p>🎯 <strong>Goal progress:</strong> 85% on Q2 targets</p>
-              <p>🔥 <strong>Streak records:</strong> Best coding streak: 8 days</p>
+            <div className="space-y-3 font-bold text-xs sm:text-sm text-slate-800">
+              {recentCommits.length > 0 || recentTracks.length > 0 ? (
+                <>
+                  <p>📈 <strong>Sync Volume:</strong> {recentCommits.length} commits and {recentTracks.length} tracks sync&apos;d recently.</p>
+                  <p>🔥 <strong>Active Integrations:</strong> {recentCommits.length > 0 ? 'GitHub active. ' : ''}{recentTracks.length > 0 ? 'Spotify active.' : ''}</p>
+                </>
+              ) : (
+                <p className="text-slate-500 font-black">No Data Available</p>
+              )}
             </div>
           </div>
           <div className="pt-6">
@@ -218,11 +222,14 @@ export default function AnalyticsPage() {
             <h3 className="text-lg font-black uppercase tracking-tight text-black mb-1">Year in Review</h3>
             <p className="text-[10px] font-black uppercase text-slate-500 mb-4">Telemetry wrap</p>
             <div className="space-y-3 font-bold text-xs sm:text-sm text-slate-800">
-              <p className="font-extrabold text-black uppercase text-xs">Wrapped analytics summary</p>
-              <p>💻 <strong>Coding telemetry:</strong> 1,200 commits across 45 repos</p>
-              <p>🎵 <strong>Music telemetry:</strong> 2,400 hours, top genre: Synthwave</p>
-              <p>📊 <strong>Productivity telemetry:</strong> 847 focus scores calculated</p>
-              <p>🏆 <strong>Best period:</strong> March with 92 average focus score</p>
+              {recentCommits.length > 0 || recentTracks.length > 0 ? (
+                <>
+                  <p>💻 <strong>Coding telemetry:</strong> {recentCommits.length} commits recorded</p>
+                  <p>🎵 <strong>Music telemetry:</strong> {recentTracks.length} tracks recorded</p>
+                </>
+              ) : (
+                <p className="text-slate-500 font-black">No Data Available</p>
+              )}
             </div>
           </div>
           <div className="pt-6">

@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/Badge'
 import { LoadingCard } from '@/components/LoadingSpinner'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { useEffect, useState, useRef } from 'react'
-import { mockDailyMetrics } from '@/lib/mockData'
 import { Play, Pause, SkipForward, SkipBack } from 'lucide-react'
 
 interface Metrics {
@@ -16,7 +15,12 @@ interface Metrics {
   focus_score: number | { score: number; components: Array<{ label: string; value: number }> }
   live_now: {
     spotify_connected: boolean
+    github_connected?: boolean
+    wakatime_connected?: boolean
   }
+  week_heatmap?: Array<{ day: string; score: number; label: string }>
+  streaks?: Array<{ name: string; current: number; best: number; icon: string }>
+  morning_briefing?: string
 }
 
 export default function DailyDashboardPage() {
@@ -86,7 +90,7 @@ export default function DailyDashboardPage() {
       } catch (err) {
         console.error('Error fetching metrics:', err)
         setError(err instanceof Error ? err.message : 'Failed to load metrics')
-        setMetrics(mockDailyMetrics as any)
+        setMetrics(null)
       } finally {
         setLoading(false)
       }
@@ -320,7 +324,7 @@ export default function DailyDashboardPage() {
           <div>
             <h3 className="text-lg font-black uppercase tracking-tight mb-4">Morning Briefing</h3>
             <p className="text-sm font-bold text-slate-800 leading-relaxed mb-4">
-              {(mockDailyMetrics as any).morning_briefing}
+              {metrics?.morning_briefing || 'No Data Available'}
             </p>
           </div>
           <div>
@@ -467,17 +471,21 @@ export default function DailyDashboardPage() {
             <h3 className="text-lg font-black uppercase tracking-tight mb-4">Focus Score</h3>
             <div className="text-center mb-6 bg-[#FFE600] border-2 border-black p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <p className="text-5xl font-black text-black">
-                {typeof metrics.focus_score === 'number' ? metrics.focus_score : metrics.focus_score.score}
+                {metrics?.focus_score && typeof metrics.focus_score !== 'number' ? metrics.focus_score.score : '-'}
               </p>
               <p className="text-[10px] font-black uppercase tracking-widest text-black mt-1">out of 100</p>
             </div>
             <div className="space-y-3">
-              {(typeof metrics.focus_score === 'number' ? (mockDailyMetrics as any).focus_score.components : metrics.focus_score.components).map((comp: any, idx: number) => (
-                <div key={idx} className="flex justify-between items-center text-xs font-bold uppercase text-slate-800">
-                  <span>{comp.label}</span>
-                  <span className="font-extrabold text-black bg-white border border-black px-1.5 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">{comp.value}%</span>
-                </div>
-              ))}
+              {metrics?.focus_score && typeof metrics.focus_score !== 'number' && metrics.focus_score.components && metrics.focus_score.components.length > 0 ? (
+                metrics.focus_score.components.map((comp: any, idx: number) => (
+                  <div key={idx} className="flex justify-between items-center text-xs font-bold uppercase text-slate-800">
+                    <span>{comp.label}</span>
+                    <span className="font-extrabold text-black bg-white border border-black px-1.5 py-0.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">{comp.value}%</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-slate-500 font-black text-center py-4">No Data Available</p>
+              )}
             </div>
           </div>
           <div className="pt-4">
@@ -490,26 +498,32 @@ export default function DailyDashboardPage() {
       <section className="space-y-4">
         <h2 className="text-xl font-black uppercase tracking-tight">Streak Tracker</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {(mockDailyMetrics as any).streaks.map((streak: any, idx: number) => (
-            <Card key={idx} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-black uppercase tracking-tight text-sm">{streak.icon} {streak.name}</h3>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-1">Current Consistency</p>
-                  <div className="w-full bg-white border-2 border-black rounded-none h-4 overflow-hidden shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-                    <div
-                      className="bg-[#FFE600] border-r-2 border-black h-full"
-                      style={{ width: `${Math.max(4, (streak.current / streak.best) * 100)}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm font-black text-black mt-1">{streak.current} Days active</p>
+          {metrics?.streaks && metrics.streaks.length > 0 ? (
+            metrics.streaks.map((streak: any, idx: number) => (
+              <Card key={idx} className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-black uppercase tracking-tight text-sm">{streak.icon} {streak.name}</h3>
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">Best Streak: {streak.best} Days</p>
-              </div>
-            </Card>
-          ))}
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-1">Current Consistency</p>
+                    <div className="w-full bg-white border-2 border-black rounded-none h-4 overflow-hidden shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                      <div
+                        className="bg-[#FFE600] border-r-2 border-black h-full"
+                        style={{ width: `${Math.max(4, (streak.current / streak.best) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-sm font-black text-black mt-1">{streak.current} Days active</p>
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">Best Streak: {streak.best} Days</p>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full bg-white border-2 border-black p-6 text-center font-bold text-slate-700">
+              No Data Available
+            </div>
+          )}
         </div>
       </section>
 
@@ -518,7 +532,11 @@ export default function DailyDashboardPage() {
         <h2 className="text-xl font-black uppercase tracking-tight">Week Heatmap</h2>
         <Card className="flex flex-col justify-between">
           <div>
-            <HeatmapGrid data={(mockDailyMetrics as any).week_heatmap} />
+            {metrics?.week_heatmap && metrics.week_heatmap.length > 0 ? (
+              <HeatmapGrid data={metrics.week_heatmap} />
+            ) : (
+              <p className="text-slate-500 font-bold text-center py-6">No Data Available</p>
+            )}
           </div>
           <div className="pt-4">
             <Badge variant="default">Visualizer</Badge>

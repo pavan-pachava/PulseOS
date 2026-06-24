@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { LoadingCard } from '@/components/LoadingSpinner'
 import { ErrorAlert } from '@/components/ErrorAlert'
-import { mockUser, mockIntegrations } from '@/lib/mockData'
+import { integrationsConfig } from '@/lib/integrations-config'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
@@ -99,8 +99,14 @@ export default function ProfilePage() {
               <Badge variant="success">User_Node_Active</Badge>
             </div>
             <p className="text-slate-800 text-xs font-black uppercase mt-1">{session?.user?.email}</p>
-            <p className="text-slate-600 text-xs font-bold uppercase tracking-wider mt-2">Member since {mockUser.joined}</p>
-            <p className="text-slate-800 font-bold mt-3 border-t border-black/10 pt-3">{mockUser.bio}</p>
+            <p className="text-slate-600 text-xs font-bold uppercase tracking-wider mt-2">
+              Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString([], { year: 'numeric', month: 'long' }) : '-'}
+            </p>
+            {user?.email && (
+              <p className="text-slate-800 font-bold mt-3 border-t border-black/10 pt-3">
+                Telemetry user node connected and actively recording.
+              </p>
+            )}
           </div>
         </div>
       </Card>
@@ -111,8 +117,8 @@ export default function ProfilePage() {
         {visibleIntegrations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {visibleIntegrations.map((integration) => {
-              const mockInt = mockIntegrations.find(i => i.id === integration.provider)
-              const displayName = mockInt?.name || integration.provider
+              const configInt = integrationsConfig.find(i => i.id === integration.provider)
+              const displayName = configInt?.name || integration.provider
 
               return (
                 <Card key={integration.id} className="text-center flex flex-col items-center justify-between p-6">
@@ -123,14 +129,14 @@ export default function ProfilePage() {
                       ) : integration.provider === 'github' ? (
                         <img src="/github.png" alt="GitHub" className="w-10 h-10 object-contain" />
                       ) : (
-                        mockInt?.icon || '🔌'
+                        configInt?.icon || '🔌'
                       )}
                     </span>
                     <h3 className="font-black uppercase tracking-tight text-sm mt-3">{displayName}</h3>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2">Last synced 2 hours ago</p>
                   </div>
                   <div className="mt-4">
-                    <Badge variant="info">{mockInt?.badge || 'OAuth'}</Badge>
+                    <Badge variant="info">{configInt?.badge || 'OAuth'}</Badge>
                   </div>
                 </Card>
               )

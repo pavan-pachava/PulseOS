@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { LoadingCard } from '@/components/LoadingSpinner'
 import { ErrorAlert } from '@/components/ErrorAlert'
-import { mockIntegrations } from '@/lib/mockData'
+import { integrationsConfig } from '@/lib/integrations-config'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
@@ -231,7 +231,7 @@ export default function IntegrationsPage() {
 
       {/* Integrations Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {mockIntegrations.map((integration) => {
+        {integrationsConfig.map((integration) => {
           const connectedInfo = integrations.find(i => i.provider === integration.id)
           const isConnected = !!connectedInfo
 
@@ -375,10 +375,25 @@ export default function IntegrationsPage() {
                           </div>
                         </>
                       ) : (
-                        Object.entries(integration.metrics).map(([key, value]) => (
-                          <div key={key}>
-                            <p className="text-lg font-black text-black">{isConnected ? (value as string) : '-'}</p>
-                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 capitalize">{key.replace(/_/g, ' ')}</p>
+                        (integration.id === 'spotify' ? [
+                          { label: 'Listening Hours', val: '-' },
+                          { label: 'Top Tracks', val: '-' },
+                          { label: 'Playlists', val: '-' }
+                        ] : integration.id === 'github' ? [
+                          { label: 'Commits', val: '-' },
+                          { label: 'PRs', val: '-' },
+                          { label: 'Reviews', val: '-' }
+                        ] : integration.id === 'wakatime' ? [
+                          { label: 'Coding Hours', val: '-' },
+                          { label: 'Languages', val: '-' }
+                        ] : [
+                          { label: 'Temp Avg', val: '-' },
+                          { label: 'Humidity', val: '-' },
+                          { label: 'Rainfall', val: '-' }
+                        ]).map((metric, idx) => (
+                          <div key={idx}>
+                            <p className="text-lg font-black text-black">{metric.val}</p>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">{metric.label}</p>
                           </div>
                         ))
                       )}

@@ -49,11 +49,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-            <p className="text-sm text-slate-300">
-              <strong>Demo mode:</strong> Enter any email to explore PulseOS with mock data.
-            </p>
-          </div>
         </div>
       </div>
     </div>
