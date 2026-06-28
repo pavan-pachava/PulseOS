@@ -9,9 +9,12 @@ export function getDb() {
       throw new Error('DATABASE_URL environment variable is not set')
     }
 
+    const isSslRequired = connectionString.includes('sslmode=require') || connectionString.includes('neon.tech')
+
     client = postgres(connectionString, {
       max: 10,
       idle_timeout: 30,
+      ssl: isSslRequired ? 'require' : undefined,
     })
   }
   return client
