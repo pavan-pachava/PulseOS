@@ -46,7 +46,7 @@ export function Sidebar() {
     <aside className="w-64 bg-white border-r-[3px] border-black p-6 h-screen flex flex-col justify-between z-20">
       <div className="space-y-8">
         {/* Brand */}
-        <Link href="http://localhost:3000" className="flex items-center gap-2 bg-[#FFE600] border-2 border-black px-3 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
+        <Link href="/" className="flex items-center gap-2 bg-[#FFE600] border-2 border-black px-3 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
           <img src="/catlogo.png" alt="Logo" className="logo-img brand-logo w-8 h-8 object-cover rounded-none" />
           <span className="brand-text text-lg font-black uppercase tracking-wider text-black">CatnelOS</span>
         </Link>
