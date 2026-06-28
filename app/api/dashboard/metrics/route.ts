@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
-import { getSpotifyCurrentlyPlaying, getSpotifyRecentlyPlayed } from '@/lib/spotify-api'
+import { getSpotifyRecentlyPlayed } from '@/lib/spotify-api'
 import { getGitHubCommits } from '@/lib/github-api'
 import { getWakaTimeSummaries } from '@/lib/wakatime-api'
 import { getSpotifyIntegration, getIntegrationByProvider } from '@/lib/auth-service'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -20,7 +22,6 @@ export async function GET() {
       getIntegrationByProvider(userId, 'wakatime')
     ])
     
-    let currentMood = 'Unknown'
     let tracksToday = 0
     let commitsToday = 0
     let codingMinutesToday = 0
@@ -44,20 +45,12 @@ export async function GET() {
 
     if (spotifyIntegration) {
       try {
-        const [currentPlaying, recentTracks] = await Promise.all([
-          getSpotifyCurrentlyPlaying(userId).catch(e => {
-            console.error('Spotify current playing fetch failed:', e)
-            return null
-          }),
-          getSpotifyRecentlyPlayed(userId, 50).catch(e => {
-            console.error('Spotify recently played fetch failed:', e)
-            return []
-          })
-        ])
+        const recentTracks = await getSpotifyRecentlyPlayed(userId, 50).catch(e => {
+          console.error('Spotify recently played fetch failed:', e)
+          return []
+        })
 
-        if (currentPlaying?.item) {
-          currentMood = 'Musical'
-        }
+
 
         if (Array.isArray(recentTracks)) {
           tracksToday = recentTracks.filter((item: any) => 
@@ -254,7 +247,7 @@ export async function GET() {
       { label: 'Music Sync Ratio', value: musicScore }
     ]
     
-    const activeComponents = focusScoreComponents.filter((c, idx) => {
+    const activeComponents = focusScoreComponents.filter((_, idx) => {
       if (idx === 0) return !!githubIntegration
       if (idx === 1) return !!wakatimeIntegration
       if (idx === 2) return !!spotifyIntegration

@@ -12,7 +12,6 @@ export function getDb() {
     client = postgres(connectionString, {
       max: 10,
       idle_timeout: 30,
-      idle_timeout_warning: 10,
     })
   }
   return client

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { exchangeSpotifyCode } from '@/lib/spotify-api'
 import { saveSpotifyIntegration } from '@/lib/auth-service'

@@ -11,7 +11,7 @@ export interface WakaTimeTokenResponse {
   uid: string
 }
 
-async function refreshAccessToken(userId: string, refreshToken: string): Promise<string> {
+async function refreshAccessToken(_userId: string, refreshToken: string): Promise<string> {
   const params = new URLSearchParams({
     grant_type: 'refresh_token',
     refresh_token: refreshToken,

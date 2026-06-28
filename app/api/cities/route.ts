@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import cities from '@/lib/cities.json'
 
+export const dynamic = 'force-dynamic'
+
 interface City {
   name: string
   city: string

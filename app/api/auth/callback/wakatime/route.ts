@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { exchangeWakaTimeCode } from '@/lib/wakatime-api'
 import { saveIntegration } from '@/lib/auth-service'

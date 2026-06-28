@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { getGitHubCommits } from '@/lib/github-api'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const session = await getSession()

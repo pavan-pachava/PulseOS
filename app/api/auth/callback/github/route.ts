@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { exchangeGitHubCode } from '@/lib/github-api'
 import { saveIntegration } from '@/lib/auth-service'

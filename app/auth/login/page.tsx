@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/Button'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -58,28 +58,26 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-black mb-1.5">Email Node</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-black mb-2">email handle</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full px-4 py-2 border-[3px] border-black text-black placeholder-slate-400 bg-white focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all rounded-none uppercase font-bold text-xs sm:text-sm tracking-wider"
+                placeholder="developer@catnel.os"
+                className="w-full px-4 py-2 border-[3px] border-black text-black font-bold bg-[#FAF9F3] placeholder-slate-500 focus:outline-none focus:bg-white rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                 required
-                disabled={isLoading}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-black mb-1.5">Secret Key</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-black mb-2">access cipher</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 border-[3px] border-black text-black placeholder-slate-400 bg-white focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all rounded-none uppercase font-bold text-xs sm:text-sm tracking-wider"
+                className="w-full px-4 py-2 border-[3px] border-black text-black font-bold bg-[#FAF9F3] placeholder-slate-500 focus:outline-none focus:bg-white rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                 required
-                disabled={isLoading}
               />
             </div>
 
@@ -87,16 +85,16 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full uppercase font-black tracking-wider mt-2"
+              className="w-full uppercase font-black tracking-wider mt-2 bg-[#B2FF00]"
               disabled={isLoading}
             >
-              {isLoading ? 'Decrypting Key...' : 'Decrypt & Sign In'}
+              {isLoading ? 'Instantiating Connection...' : 'Connect Node to Core'}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-slate-700 text-xs font-bold uppercase tracking-wider">
-              New node?{' '}
+              No registered node?{' '}
               <a href="/auth/register" className="text-[#FF5EA6] hover:underline font-black">
                 Register Node
               </a>
@@ -112,5 +110,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen neo-grid neo-glow flex items-center justify-center p-4">
+        <div className="bg-white border-[3px] border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-black">
+          <p className="font-bold text-center">Loading CatnelOS...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
